@@ -8,6 +8,7 @@ rawData[is.na(rawData)] <- 0
 
 rawDate <- list()
 rawTime <- list()
+observation <- list()
 
 obsRaw <- dplyr::select(rawData, -c(X,date))
 
@@ -19,11 +20,14 @@ for(i in 1:length(names(obsRaw))){  #for each column
   for(j in 1:NROW(curCol)){   #for each row
     nObs <- curCol[j,]
     if(nObs > 0){
-      for(k in 1:nObs){
-        rawDate <- append(rawDate,names(obsRaw[i]))
-        #print(toString(rawData$X[j]))
-        rawTime <- append(rawTime,toString(rawData$X[j]))
-      }
+      rawDate <- append(rawDate,names(obsRaw[i]))
+      rawTime <- append(rawTime, toString(rawData$X[j]))
+      observation <- append(observation,nObs)
+      # for(k in 1:nObs){
+      #   rawDate <- append(rawDate,names(obsRaw[i]))
+      #   #print(toString(rawData$X[j]))
+      #   rawTime <- append(rawTime,toString(rawData$X[j]))
+      # }
     }
   }
 }
@@ -31,6 +35,7 @@ for(i in 1:length(names(obsRaw))){  #for each column
 
 date <- unlist(rawDate)
 time <- unlist(rawTime)
+observation <- unlist(observation)
 
 cleanDate <- list()
 for(i in 1:length(rawDate)){
@@ -51,8 +56,8 @@ for(i in 1:length(rawDate)){
 
 #----------------------------------------------------------------------------------------------------
 
-obsData <- data.frame(cbind(unlist(cleanDate),unlist(time)))
-names(obsData) <- c("Date","Time")
+obsData <- data.frame(cbind(unlist(cleanDate),unlist(time),unlist(observation)))
+names(obsData) <- c("Date","Time","nObs")
 
 obsData$Time <- lapply(obsData$Time,toString)
 
@@ -75,10 +80,16 @@ obsData$Date <- as.POSIXct(obsData$Date)
 
 
 ggplot() +
-  geom_point(obsData, mapping = aes(x=Date, y=Time)) +
-  scale_x_datetime(breaks=waiver, date_breaks = "7 days",labels = date_format("%b-%d"))
+  geom_point(obsData, mapping = aes(x=Date, y=Time, color=nObs)) +
+  scale_x_datetime(breaks=waiver, date_breaks="7 days",labels = date_format("%b-%d")) +
+  scale_y_datetime(breaks=waiver, date_breaks="20 minutes"))
 
+b <- a[seq(1, length(a), 6)]
 
+seq(min(obsData$Time),max(obsData$Time), "2 hours")
+
+seq(as.POSIXct("2012-02-09 00:59:00 CET"),
+    as.POSIXct("2012-02-11 00:59:00 CET"), "8 hours")
 
 print(rawDate)
 testrawDate <- unlist(rawDate[1])
