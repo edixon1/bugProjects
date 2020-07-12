@@ -2,7 +2,7 @@ library(ggplot2)
 library(dplyr)
 library(scales)
 
-rawData <- read.csv("Data/stygian_Observations.csv")
+rawData <- read.csv("Data/stygian_raw.csv")
 rawData <- rawData[-c(1:3),]
 rawData$X8.28.19 <- NULL
 rawData[is.na(rawData)] <- 0
@@ -21,9 +21,15 @@ for(i in 1:length(names(obsRaw))){  #for each column
   for(j in 1:NROW(curCol)){   #for each row
     nObs <- curCol[j,]
     if(nObs > 0){
-      rawDate <- append(rawDate,names(obsRaw[i]))
-      rawTime <- append(rawTime, toString(rawData$X[j]))
-      observation <- append(observation,nObs)
+      for(k in 1:nObs){
+        rawDate <- append(rawDate, names(obsRaw[i]))
+        rawTime <- append(rawTime, toString(rawData$X[j]))
+        print(toString(rawData$X[j]))
+      }
+      #rawDate <- append(rawDate,names(obsRaw[i]))
+      #print(names(obsRaw[i]))
+      #rawTime <- append(rawTime, toString(rawData$X[j]))
+      #observation <- append(observation,nObs)
     }
   }
 }
@@ -31,7 +37,7 @@ for(i in 1:length(names(obsRaw))){  #for each column
 
 date <- unlist(rawDate)
 time <- unlist(rawTime)
-observation <- unlist(observation)
+#observation <- unlist(observation)
 
 cleanDate <- list()
 for(i in 1:length(rawDate)){
@@ -50,8 +56,8 @@ for(i in 1:length(rawDate)){
 
 #----------------------------------------------------------------------------------------------------
 
-obsData <- data.frame(cbind(unlist(cleanDate),unlist(time),unlist(observation)))
-names(obsData) <- c("Date","Time","nObs")
+obsData <- data.frame(cbind(unlist(cleanDate),unlist(time)))#,unlist(observation)))
+names(obsData) <- c("Date","Time")#,"nObservations")
 
 obsData$Time <- lapply(obsData$Time,toString)
 
@@ -69,9 +75,7 @@ obsData$Time <- strptime(x = obsData$Time, format = "%I%M%p")
 
 #------------------------------------------------------
 
-write.csv(obsData, "Data/cleanedStygian.csv")
+write.csv(obsData, "Data/stygian_cleaned_all.csv")
 
-obsData$Time <- as.POSIXct(obsData$Time, format = "%I%M%p")
-obsData$Date <- as.POSIXct(obsData$Date)
 
 
